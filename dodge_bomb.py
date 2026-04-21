@@ -1,10 +1,9 @@
 import os
 import sys
+import pygame as pg
 import random
 import time
 import math
-import pygame as pg
-
 
 WIDTH, HEIGHT = 1100, 650
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -96,8 +95,6 @@ def calc_orientation(
 
     return dx, dy
 
-
-
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -114,7 +111,6 @@ def main():
     bb_rct.centery = random.randint(0, HEIGHT)  
     vx, vy = +5, +5
     
-
     clock = pg.time.Clock()
     tmr = 0
     while True:
@@ -172,8 +168,6 @@ def main():
         vx, vy = calc_orientation(bb_rct, kk_rct, (vx, vy))
         bb_rct.move_ip(vx, vy)
         
-        
-
 if __name__ == "__main__":
     pg.init()
     main()
