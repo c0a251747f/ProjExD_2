@@ -2,6 +2,7 @@ import os
 import sys
 import random
 import time
+import math
 import pygame as pg
 
 
@@ -63,6 +64,39 @@ def gameover(screen: pg.Surface) -> None:
 
     pg.display.update()
     time.sleep(5)
+
+def calc_orientation(
+    org: pg.Rect,
+    dst: pg.Rect,
+    current_xy: tuple[float, float]) -> tuple[float, float]:
+    """
+    爆弾からこうかとんへの方向ベクトルを計算する
+
+    引数：
+        org: 爆弾Rect
+        dst: こうかとんRect
+        current_xy: 現在の速度ベクトル
+
+    戻り値：
+        正規化された方向ベクトル
+    """
+    dx = dst.centerx - org.centerx
+    dy = dst.centery - org.centery
+
+    dist = math.sqrt(dx**2 + dy**2)
+
+    # 近すぎるときはそのまま
+    if dist < 300:
+        return current_xy
+
+    # 正規化（長さ√50 ≒ 7.07）
+    if dist != 0:
+        dx = dx / dist * 7
+        dy = dy / dist * 7
+
+    return dx, dy
+
+
 
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
@@ -134,6 +168,11 @@ def main():
         if kk_rct.colliderect(bb_rct):
             gameover(screen)
             return
+        
+        vx, vy = calc_orientation(bb_rct, kk_rct, (vx, vy))
+        bb_rct.move_ip(vx, vy)
+        
+        
 
 if __name__ == "__main__":
     pg.init()
