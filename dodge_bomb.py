@@ -7,6 +7,20 @@ import pygame as pg
 WIDTH, HEIGHT = 1100, 650
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
+def check_bound(rct: pg.Rect) -> tuple[bool, bool]:
+    """
+    引数で与えられたRectが画面内か画面外か判定する関数
+    引数：こうかとんRectまたは爆弾Rect
+    戻り値：タプル（横方向判定結果，縦方向判定結果）
+    画面内ならTrue,画面外ならFalse
+    """
+    yoko, tate = True, True
+    if rct.left < 0 or WIDTH < rct.right:
+        yoko = False
+    if rct.top < 0 or HEIGHT <rct.bottom:
+        tate = False
+    return yoko, tate
+
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -15,12 +29,12 @@ def main():
     kk_rct = kk_img.get_rect()
     kk_rct.center = 300, 200
 
-    bb_img = pg.surface((20,20))
-    pg.draw.circle(bb_img, (225, 0, 0), (10, 10), 10)
-    bb_img.set_colorkey((0, 0, 0))
-    bb_rct = bb_img.get_rect()
-    bb_rct.centerx = random.randint(0, WIDTH)  
-    bb_rct.centery = random.randint(0, HEIGHT)  
+    bb_img = pg.Surface((20, 20))  # 爆弾用の空のSurfaceを作る
+    pg.draw.circle(bb_img, (255, 0, 0), (10, 10), 10)  # 爆弾円を描く
+    bb_img.set_colorkey((0, 0, 0))  # 爆弾の黒い部分を透過させる
+    bb_rct = bb_img.get_rect()  # 爆弾Rectを取得する
+    bb_rct.centerx = random.randint(0, WIDTH)  # 爆弾の初期横座標を設定する
+    bb_rct.centery = random.randint(0, HEIGHT)  # 爆弾の初期縦座標を設定する
     vx, vy = +5, +5
 
     clock = pg.time.Clock()
@@ -55,8 +69,16 @@ def main():
                 sum_mv[1] += mv[1]
 
         kk_rct.move_ip(sum_mv)
+        if check_bound(kk_rct) != (True, True):
+            kk_rct.move_ip(-sum_mv[0], -sum_mv[1])
+        
         screen.blit(kk_img, kk_rct)
-        bb_rct.move_ip(vx, vy)
+        bb_rct.move_ip(vx, vy)  
+        yoko, tate = check_bound( bb_rct)
+        if not yoko:
+            vx *=-1
+        if not tate:
+            vy *= -1
         screen.blit(bb_img, bb_rct)
         pg.display.update()
         tmr += 1
