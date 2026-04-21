@@ -1,6 +1,7 @@
 import os
 import sys
 import random
+import time
 import pygame as pg
 
 
@@ -21,6 +22,48 @@ def check_bound(rct: pg.Rect) -> tuple[bool, bool]:
         tate = False
     return yoko, tate
 
+def gameover(screen: pg.Surface) -> None:
+    """
+    ゲームオーバー画面
+
+    引数：画面Surface
+    戻り値：なし
+    """
+    # 黒背景
+    black = pg.Surface(screen.get_size())
+    black.fill((0, 0, 0))
+    black.set_alpha(200)
+
+    if black.get_alpha() is None:
+        black.set_alpha(200)
+
+    # フォント
+    font = pg.font.Font(None, 80)
+    text = font.render("Game Over", True, (255, 255, 255))
+    text_rect = text.get_rect()
+    text_rect.center = screen.get_rect().center
+
+    # こうかとん画像（左）
+    kk_img_left = pg.image.load("fig/8.png")
+    kk_rct_left = kk_img_left.get_rect()
+
+    # こうかとん画像（右）
+    kk_img_right = pg.image.load("fig/8.png")
+    kk_rct_right = kk_img_right.get_rect()
+
+    # 配置（文字の左右）
+    kk_rct_left.center = (text_rect.left - 100, text_rect.centery)
+    kk_rct_right.center = (text_rect.right + 100, text_rect.centery)
+
+    # 描画
+    screen.blit(black, (0, 0))
+    screen.blit(text, text_rect)
+    screen.blit(kk_img_left, kk_rct_left)
+    screen.blit(kk_img_right, kk_rct_right)
+
+    pg.display.update()
+    time.sleep(5)
+
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -29,13 +72,14 @@ def main():
     kk_rct = kk_img.get_rect()
     kk_rct.center = 300, 200
 
-    bb_img = pg.Surface((20, 20))  # 爆弾用の空のSurfaceを作る
-    pg.draw.circle(bb_img, (255, 0, 0), (10, 10), 10)  # 爆弾円を描く
-    bb_img.set_colorkey((0, 0, 0))  # 爆弾の黒い部分を透過させる
-    bb_rct = bb_img.get_rect()  # 爆弾Rectを取得する
-    bb_rct.centerx = random.randint(0, WIDTH)  # 爆弾の初期横座標を設定する
-    bb_rct.centery = random.randint(0, HEIGHT)  # 爆弾の初期縦座標を設定する
+    bb_img = pg.Surface((20, 20))  
+    pg.draw.circle(bb_img, (255, 0, 0), (10, 10), 10)  
+    bb_img.set_colorkey((0, 0, 0))  
+    bb_rct = bb_img.get_rect()  
+    bb_rct.centerx = random.randint(0, WIDTH)  
+    bb_rct.centery = random.randint(0, HEIGHT)  
     vx, vy = +5, +5
+    
 
     clock = pg.time.Clock()
     tmr = 0
@@ -87,6 +131,9 @@ def main():
         tmr += 1
         clock.tick(50)
 
+        if kk_rct.colliderect(bb_rct):
+            gameover(screen)
+            return
 
 if __name__ == "__main__":
     pg.init()
